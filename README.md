@@ -36,7 +36,7 @@ For a more detailed description, and dependencies, visit [How to Build Transmiss
     $ mkdir build
     $ cd build
     $ # Use -DCMAKE_BUILD_TYPE=RelWithDebInfo to build optimized binary.
-    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    $ cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
     $ make
     $ sudo make install
 
@@ -54,7 +54,7 @@ If you're new to building programs from source code, this is typically easier th
     $ mkdir build
     $ cd build
     $ # Use -DCMAKE_BUILD_TYPE=RelWithDebInfo to build optimized binary.
-    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    $ cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
     $ make
     $ sudo make install
 
@@ -66,7 +66,7 @@ If you're new to building programs from source code, this is typically easier th
     $ git pull --rebase --prune
     $ git submodule update --recursive
     $ # Use -DCMAKE_BUILD_TYPE=RelWithDebInfo to build optimized binary.
-    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    $ cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
     $ make
     $ sudo make install
 
