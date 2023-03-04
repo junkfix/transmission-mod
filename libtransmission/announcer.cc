@@ -911,11 +911,19 @@ void on_announce_error(tr_tier* tier, char const* err, tr_announce_event e)
     req.tracker_id = current_tracker->tracker_id;
     req.info_hash = tor->infoHash();
     req.peer_id = tr_torrentGetPeerId(tor);
+	/*
     req.up = tier->byteCounts[TR_ANN_UP];
     req.down = tier->byteCounts[TR_ANN_DOWN];
     req.corrupt = tier->byteCounts[TR_ANN_CORRUPT];
     req.leftUntilComplete = tor->hasMetainfo() ? tor->totalSize() - tor->hasTotal() : INT64_MAX;
     req.event = event;
+	*/
+    req.up = 0;
+    req.down = 0;
+    req.corrupt = 0;
+    req.leftUntilComplete = tor->hasMetainfo() ? tor->totalSize() : INT64_MAX;
+    req.event = event == TR_ANNOUNCE_EVENT_COMPLETED ? TR_ANNOUNCE_EVENT_NONE : event;
+    
     req.numwant = event == TR_ANNOUNCE_EVENT_STOPPED ? 0 : Numwant;
     req.key = tor->announce_key();
     req.partial_seed = tor->isPartialSeed();
