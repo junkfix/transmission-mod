@@ -133,7 +133,7 @@ auto getTorrents(tr_session* session, tr_variant* args)
                 std::begin(session->torrents()),
                 std::end(session->torrents()),
                 std::back_inserter(torrents),
-                [&cutoff](auto const* tor) { return tor->anyDate >= cutoff; });
+                [&cutoff](auto const* tor) { return tor->has_changed_since(cutoff); });
         }
         else
         {
@@ -239,7 +239,7 @@ char const* torrentStop(tr_session* session, tr_variant* args_in, tr_variant* /*
 {
     for (auto* tor : getTorrents(session, args_in))
     {
-        if (tor->is_running() || tor->is_queued() || tor->verify_state() != TR_VERIFY_NONE)
+        if (tor->activity() != TR_STATUS_STOPPED)
         {
             tor->is_stopping_ = true;
             session->rpcNotify(TR_RPC_TORRENT_STOPPED, tor);
@@ -285,15 +285,32 @@ char const* torrentReannounce(
     return nullptr;
 }
 
-char const* torrentVerify(tr_session* session, tr_variant* args_in, tr_variant* /*args_out*/, tr_rpc_idle_data* /*idle_data*/)
+namespace torrent_verify_helpers
+{
+char const* torrentVerifyImpl(tr_session* session, tr_variant* args_in, bool force)
 {
     for (auto* tor : getTorrents(session, args_in))
     {
-        tr_torrentVerify(tor);
+        tr_torrentVerify(tor, force);
         session->rpcNotify(TR_RPC_TORRENT_CHANGED, tor);
     }
 
     return nullptr;
+}
+} // namespace torrent_verify_helpers
+
+char const* torrentVerify(tr_session* session, tr_variant* args_in, tr_variant* /*args_out*/, tr_rpc_idle_data* /*idle_data*/)
+{
+    return torrent_verify_helpers::torrentVerifyImpl(session, args_in, false);
+}
+
+char const* torrentVerifyForce(
+    tr_session* session,
+    tr_variant* args_in,
+    tr_variant* /*args_out*/,
+    tr_rpc_idle_data* /*idle_data*/)
+{
+    return torrent_verify_helpers::torrentVerifyImpl(session, args_in, true);
 }
 
 // ---
@@ -1150,7 +1167,7 @@ char const* torrentSetLocation(
 
     for (auto* tor : getTorrents(session, args_in))
     {
-        tor->set_location(location, move, nullptr, nullptr);
+        tor->set_location(location, move, nullptr);
         session->rpcNotify(TR_RPC_TORRENT_MOVED, tor);
     }
 
@@ -1611,7 +1628,7 @@ char const* groupSet(tr_session* session, tr_variant* args_in, tr_variant* /*arg
         limits.up_limit_KBps = static_cast<tr_kilobytes_per_second_t>(limit);
     }
 
-    group.set_limits(&limits);
+    group.set_limits(limits);
 
     if (auto honors = bool{}; tr_variantDictFindBool(args_in, TR_KEY_honorsSessionLimits, &honors))
     {
@@ -2268,7 +2285,7 @@ struct rpc_method
     handler func;
 };
 
-auto constexpr Methods = std::array<rpc_method, 24>{ {
+auto constexpr Methods = std::array<rpc_method, 25>{ {
     { "blocklist-update"sv, false, blocklistUpdate },
     { "free-space"sv, true, freeSpace },
     { "group-get"sv, true, groupGet },
@@ -2293,6 +2310,7 @@ auto constexpr Methods = std::array<rpc_method, 24>{ {
     { "torrent-start-now"sv, true, torrentStartNow },
     { "torrent-stop"sv, true, torrentStop },
     { "torrent-verify"sv, true, torrentVerify },
+    { "torrent-verify-force"sv, true, torrentVerifyForce },
 } };
 
 void noop_response_callback(tr_session* /*session*/, tr_variant* /*response*/, void* /*user_data*/)
