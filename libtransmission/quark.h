@@ -1,4 +1,4 @@
-// This file Copyright © 2012-2023 Mnemosyne LLC.
+// This file Copyright © Mnemosyne LLC.
 // It may be used under GPLv2 (SPDX: GPL-2.0-only), GPLv3 (SPDX: GPL-3.0-only),
 // or any future license endorsed by Mnemosyne LLC.
 // License text can be found in the licenses/ folder.
@@ -159,6 +159,7 @@ enum
     TR_KEY_incomplete_dir_enabled,
     TR_KEY_info,
     TR_KEY_inhibit_desktop_hibernation,
+    TR_KEY_ipProtocol,
     TR_KEY_ipv4,
     TR_KEY_ipv6,
     TR_KEY_isBackup,
@@ -242,6 +243,7 @@ enum
     TR_KEY_percentComplete,
     TR_KEY_percentDone,
     TR_KEY_pex_enabled,
+    TR_KEY_pidfile,
     TR_KEY_piece,
     TR_KEY_piece_length,
     TR_KEY_pieceCount,
@@ -253,7 +255,6 @@ enum
     TR_KEY_port_is_open,
     TR_KEY_preallocation,
     TR_KEY_preferred_transport,
-    TR_KEY_prefetch_enabled,
     TR_KEY_primary_mime_type,
     TR_KEY_priorities,
     TR_KEY_priority,
@@ -351,6 +352,7 @@ enum
     TR_KEY_size_bytes,
     TR_KEY_size_units,
     TR_KEY_sizeWhenDone,
+    TR_KEY_sleep_per_seconds_during_verify,
     TR_KEY_sort_mode,
     TR_KEY_sort_reversed,
     TR_KEY_source,
@@ -423,6 +425,7 @@ enum
     TR_KEY_wanted,
     TR_KEY_watch_dir,
     TR_KEY_watch_dir_enabled,
+    TR_KEY_watch_dir_force_generic,
     TR_KEY_webseeds,
     TR_KEY_webseedsSendingToUs,
     TR_KEY_yourip,

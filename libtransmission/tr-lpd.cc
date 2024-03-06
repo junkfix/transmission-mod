@@ -1,21 +1,24 @@
-// Except where noted, this file Copyright © 2010-2023 Johannes Lieder.
+// Except where noted, This file Copyright © Johannes Lieder.
 // It may be used under the MIT (SPDX: MIT) license.
 // License text can be found in the licenses/ folder.
 
 #include <algorithm>
 #include <array>
 #include <chrono>
-#include <cstdint>
+#include <cstddef> // std::byte
+#include <cstdint> // uint16_t
 #include <cstring>
+#include <ctime> // time_t
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #else
-#include <ctime>
 #include <sys/socket.h> /* socket(), bind() */
 #include <netinet/in.h> /* sockaddr_in */
 #endif
@@ -37,7 +40,7 @@
 
 using namespace std::literals;
 
-// Code in this namespace Copyright © 2022 Mnemosyne LLC.
+// Code in this namespace Copyright © Mnemosyne LLC.
 // It may be used under GPLv2 (SPDX: GPL-2.0-only), GPLv3 (SPDX: GPL-3.0-only), MIT (SPDX: MIT),
 // or any future license endorsed by Mnemosyne LLC.
 // License text can be found in the licenses/ folder.
@@ -231,7 +234,7 @@ public:
 
         if (mcast_socket_ != TR_BAD_SOCKET)
         {
-            evutil_closesocket(mcast_socket_);
+            tr_net_close_socket(mcast_socket_);
         }
 
         tr_logAddTrace("Done uninitialising Local Peer Discovery");
@@ -246,7 +249,7 @@ private:
         }
 
         auto const err = sockerrno;
-        evutil_closesocket(mcast_socket_);
+        tr_net_close_socket(mcast_socket_);
         mcast_socket_ = TR_BAD_SOCKET;
         tr_logAddWarn(fmt::format(
             _("Couldn't initialize LPD: {error} ({error_code})"),
@@ -266,7 +269,7 @@ private:
      */
     bool initImpl(struct event_base* event_base)
     {
-        auto const opt_on = int{ 1 };
+        auto const opt_on = 1;
 
         static_assert(AnnounceScope > 0);
 
@@ -540,14 +543,14 @@ private:
     // bogus data. Better to drop a few packets than get DoS'ed.
     static auto constexpr DosInterval = 5s;
     std::unique_ptr<libtransmission::Timer> dos_timer_;
-    static auto constexpr MaxIncomingPerSecond = int{ 10 };
+    static auto constexpr MaxIncomingPerSecond = 10;
     static auto constexpr MaxIncomingPerUpkeep = std::chrono::duration_cast<std::chrono::seconds>(DosInterval).count() *
         MaxIncomingPerSecond;
     // @brief throw away messages after this number exceeds MaxIncomingPerUpkeep
     size_t messages_received_since_upkeep_ = 0U;
 
     static auto constexpr TorrentAnnounceIntervalSec = time_t{ 240U }; // how frequently to reannounce the same torrent
-    static auto constexpr TtlSameSubnet = int{ 1 };
+    static auto constexpr TtlSameSubnet = 1;
     static auto constexpr AnnounceScope = int{ TtlSameSubnet }; /**<the maximum scope for LPD datagrams */
 };
 
