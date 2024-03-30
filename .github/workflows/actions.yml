@@ -12,19 +12,19 @@ jobs:
   what-to-make:
     runs-on: ubuntu-22.04
     outputs:
-      make-android: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.android-changed == '1' }}
-      make-cli: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.cli-changed == '1' }}
-      make-daemon: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.daemon-changed == '1' }}
-      make-dist: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.dist-changed == '1' }}
+      make-android: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.android-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-cli: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.cli-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-daemon: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.daemon-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-dist: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.dist-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
       make-docs: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.docs-changed == '1' }}
-      make-gtk: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.gtk-changed == '1' }}
-      make-mac: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.mac-changed == '1' }}
-      make-qt: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.qt-changed == '1' }}
-      make-source-tarball: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.any-code-changed == '1' }}
-      make-tests: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.tests-changed == '1' }}
-      make-utils: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.utils-changed == '1' || steps.check-diffs.outputs.tests-changed == '1' }}
+      make-gtk: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.gtk-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-mac: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.mac-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-qt: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.qt-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-source-tarball: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.any-code-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-tests: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.tests-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
+      make-utils: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.utils-changed == '1' || steps.check-diffs.outputs.tests-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
       make-web: 'false' # this is handled in the webapp workflow
-      test-style: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.our-code-changed == '1' }}
+      test-style: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.our-code-changed == '1' || steps.check-diffs.outputs.ci-actions-changed == '1' }}
     steps:
       - name: Check Push to Main Branch
         id: check-main-push
@@ -54,19 +54,20 @@ jobs:
             git diff --exit-code "$MERGE_BASE" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
           }
-          get_changes android  CMakeLists.txt cmake third-party libtransmission android
-          get_changes cli      CMakeLists.txt cmake Transmission.xcodeproj third-party libtransmission cli
-          get_changes any-code CMakeLists.txt cmake Transmission.xcodeproj libtransmission cli daemon gtk macosx qt utils tests web third-party
-          get_changes our-code CMakeLists.txt cmake Transmission.xcodeproj libtransmission cli daemon gtk macosx qt utils tests web
-          get_changes daemon   CMakeLists.txt cmake Transmission.xcodeproj third-party libtransmission daemon
-          get_changes dist     dist release
-          get_changes docs     docs
-          get_changes gtk      CMakeLists.txt cmake third-party libtransmission gtk
-          get_changes mac      CMakeLists.txt cmake Transmission.xcodeproj third-party libtransmission macosx
-          get_changes qt       CMakeLists.txt cmake third-party libtransmission qt
-          get_changes tests    CMakeLists.txt cmake third-party libtransmission utils tests
-          get_changes utils    CMakeLists.txt cmake third-party libtransmission utils
-          get_changes web      CMakeLists.txt cmake third-party libtransmission web
+          get_changes android    CMakeLists.txt cmake third-party libtransmission android
+          get_changes cli        CMakeLists.txt cmake Transmission.xcodeproj third-party libtransmission cli
+          get_changes any-code   CMakeLists.txt cmake Transmission.xcodeproj libtransmission cli daemon gtk macosx qt utils tests web third-party
+          get_changes our-code   CMakeLists.txt cmake Transmission.xcodeproj libtransmission cli daemon gtk macosx qt utils tests web
+          get_changes daemon     CMakeLists.txt cmake Transmission.xcodeproj third-party libtransmission daemon
+          get_changes dist       dist release
+          get_changes docs       docs
+          get_changes gtk        CMakeLists.txt cmake third-party libtransmission gtk
+          get_changes mac        CMakeLists.txt cmake Transmission.xcodeproj third-party libtransmission macosx
+          get_changes qt         CMakeLists.txt cmake third-party libtransmission qt
+          get_changes tests      CMakeLists.txt cmake third-party libtransmission utils tests
+          get_changes utils      CMakeLists.txt cmake third-party libtransmission utils
+          get_changes web        CMakeLists.txt cmake third-party libtransmission web
+          get_changes ci-actions .github/workflows/actions.yml
           cat "$GITHUB_OUTPUT"
 
   code-style:
@@ -115,37 +116,81 @@ jobs:
           echo "When CI is done, the above patch will be uploaded as 'code-style.diff' to https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/ ."
           exit 1
 
-  sanitizer-tests:
-    runs-on: ubuntu-22.04
+#  sanitizer-tests-ubuntu:
+#    runs-on: ubuntu-22.04
+#    needs: [ what-to-make ]
+#    if: ${{ needs.what-to-make.outputs.make-tests == 'true' }}
+#    env:
+#      NODE_PATH: /usr/lib/nodejs:/usr/share/nodejs
+#    steps:
+#      - name: Show Configuration
+#        run: |
+#          echo '${{ toJSON(needs) }}'
+#          echo '${{ toJSON(runner) }}'
+#          cat /etc/os-release
+#      - name: Get Dependencies
+#        run: |
+#          set -ex
+#          sudo apt-get update
+#          sudo apt-get install -y --no-install-recommends \
+#            ca-certificates \
+#            clang \
+#            cmake \
+#            gettext \
+#            libcurl4-openssl-dev \
+#            libdeflate-dev \
+#            libevent-dev \
+#            libfmt-dev \
+#            libminiupnpc-dev \
+#            libnatpmp-dev \
+#            libpsl-dev \
+#            libssl-dev \
+#            ninja-build \
+#            npm
+#      - name: Get Source
+#        uses: actions/checkout@v4
+#        with:
+#          submodules: recursive
+#          path: src
+#      - name: Configure
+#        run: |
+#          cmake \
+#            -S src \
+#            -B obj \
+#            -G Ninja \
+#            -DCMAKE_BUILD_TYPE=Debug \
+#            -DCMAKE_CXX_COMPILER='clang++' \
+#            -DCMAKE_CXX_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+#            -DCMAKE_C_COMPILER='clang' \
+#            -DCMAKE_C_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+#            -DCMAKE_INSTALL_PREFIX=pfx \
+#            -DENABLE_CLI=OFF \
+#            -DENABLE_DAEMON=OFF \
+#            -DENABLE_GTK=OFF \
+#            -DENABLE_MAC=OFF \
+#            -DENABLE_QT=OFF \
+#            -DENABLE_TESTS=ON \
+#            -DENABLE_UTILS=ON \
+#            -DREBUILD_WEB=OFF \
+#            -DRUN_CLANG_TIDY=OFF
+#      - name: Make
+#        run: cmake --build obj --config Debug --target libtransmission-test transmission-show
+#      - name: Test with sanitizers
+#        run: cmake -E chdir obj ctest -j $(nproc) --build-config Debug --output-on-failure
+
+  sanitizer-tests-macos:
+    runs-on: macos-14
     needs: [ what-to-make ]
     if: ${{ needs.what-to-make.outputs.make-tests == 'true' }}
-    env:
-      NODE_PATH: /usr/lib/nodejs:/usr/share/nodejs
     steps:
       - name: Show Configuration
         run: |
           echo '${{ toJSON(needs) }}'
           echo '${{ toJSON(runner) }}'
-          cat /etc/os-release
+          sw_vers
       - name: Get Dependencies
         run: |
-          set -ex
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ca-certificates \
-            clang \
-            cmake \
-            gettext \
-            libcurl4-openssl-dev \
-            libdeflate-dev \
-            libevent-dev \
-            libfmt-dev \
-            libminiupnpc-dev \
-            libnatpmp-dev \
-            libpsl-dev \
-            libssl-dev \
-            ninja-build \
-            npm
+          brew install cmake gettext libdeflate libevent libpsl miniupnpc ninja node pkg-config
       - name: Get Source
         uses: actions/checkout@v4
         with:
@@ -158,10 +203,8 @@ jobs:
             -B obj \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_CXX_COMPILER='clang++' \
-            -DCMAKE_CXX_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
-            -DCMAKE_C_COMPILER='clang' \
-            -DCMAKE_C_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+            -DCMAKE_CXX_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,undefined' \
+            -DCMAKE_C_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,undefined' \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DENABLE_CLI=OFF \
             -DENABLE_DAEMON=OFF \
@@ -268,7 +311,7 @@ jobs:
             -DENABLE_GTK=${{ (needs.what-to-make.outputs.make-gtk == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_MAC=${{ (needs.what-to-make.outputs.make-mac == 'true') && 'ON' || 'OFF' }}  \
             -DENABLE_QT=${{ (needs.what-to-make.outputs.make-qt == 'true') && 'ON' || 'OFF' }} \
-            -DENABLE_TESTS=OFF \
+            -DENABLE_TESTS=ON \
             -DENABLE_UTILS=${{ (needs.what-to-make.outputs.make-utils == 'true') && 'ON' || 'OFF' }} \
             -DREBUILD_WEB=${{ (needs.what-to-make.outputs.make-web == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_WERROR=ON \
@@ -286,6 +329,42 @@ jobs:
         with:
           name: binaries-${{ github.job }}
           path: pfx/**/*
+
+  # Only verify build support on old macOS
+  macos-11:
+    runs-on: macos-11
+    needs: [ what-to-make ]
+    if: ${{ needs.what-to-make.outputs.make-mac == 'true' }}
+    steps:
+      - name: Show Configuration
+        run: |
+          echo '${{ toJSON(needs) }}'
+          echo '${{ toJSON(runner) }}'
+          sw_vers
+      - name: Get Dependencies
+        run: |
+          brew install cmake gettext libdeflate libevent libpsl miniupnpc ninja node pkg-config
+      - name: Get Source
+        uses: actions/checkout@v4
+        with:
+          path: src
+          submodules: recursive
+      - name: Configure
+        run: |
+          cmake \
+            -S src \
+            -B obj \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_INSTALL_PREFIX=pfx \
+            -DCMAKE_OSX_ARCHITECTURES='x86_64' \
+            -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt \
+            -DENABLE_MAC=${{ (needs.what-to-make.outputs.make-mac == 'true') && 'ON' || 'OFF' }}  \
+            -DENABLE_TESTS=OFF \
+            -DENABLE_WERROR=ON \
+            -DRUN_CLANG_TIDY=OFF
+      - name: Make
+        run: cmake --build obj --config RelWithDebInfo
 
   alpine-musl:
     needs: [ what-to-make ]
@@ -387,7 +466,7 @@ jobs:
             nodejs
           & "C:\Program Files\OpenSSL\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- | Out-Host
           (Join-Path $Env:ProgramFiles NASM) | Out-File $Env:GITHUB_PATH -Append
-          (Join-Path ${Env:ProgramFiles(x86)} 'WiX Toolset v3.11' bin) | Out-File $Env:GITHUB_PATH -Append
+          (Join-Path (Get-Item -Path "${Env:ProgramFiles(x86)}\WiX Toolset v3.*")[0].FullName bin) | Out-File $Env:GITHUB_PATH -Append
 
           Install-Module -Name Pscx -RequiredVersion 4.0.0-beta4 -AllowPrerelease -Force
       - name: Get Source
