@@ -56,6 +56,7 @@ TEST_P(IncompleteDirTest, incompleteDir)
 
     // init an incomplete torrent.
     // the test zero_torrent will be missing its first piece.
+    tr_sessionSetIncompleteFileNamingEnabled(session_, true);
     auto* const tor = zeroTorrentInit(ZeroTorrentState::Partial);
     auto path = tr_pathbuf{};
 
@@ -134,7 +135,7 @@ TEST_P(IncompleteDirTest, incompleteDir)
     }
 
     // cleanup
-    tr_torrentRemove(tor, true, nullptr, nullptr);
+    tr_torrentRemove(tor, true, nullptr, nullptr, nullptr, nullptr);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -188,7 +189,7 @@ TEST_F(MoveTest, setLocation)
     }
 
     // cleanup
-    tr_torrentRemove(tor, true, nullptr, nullptr);
+    tr_torrentRemove(tor, true, nullptr, nullptr, nullptr, nullptr);
 }
 
 } // namespace libtransmission::test

@@ -38,7 +38,7 @@ class RenameTest : public SessionTest
 protected:
     void torrentRemoveAndWait(tr_torrent* tor, size_t expected_torrent_count)
     {
-        tr_torrentRemove(tor, false, nullptr, nullptr);
+        tr_torrentRemove(tor, false, nullptr, nullptr, nullptr, nullptr);
         auto const test = [this, expected_torrent_count]()
         {
             return std::size(session_->torrents()) == expected_torrent_count;
@@ -448,6 +448,8 @@ TEST_F(RenameTest, partialFile)
     /***
     ****  create our test torrent with an incomplete .part file
     ***/
+
+    tr_sessionSetIncompleteFileNamingEnabled(session_, true);
 
     auto* tor = zeroTorrentInit(ZeroTorrentState::Partial);
     EXPECT_EQ(TotalSize, tor->total_size());
