@@ -478,7 +478,7 @@ tr_variant Prefs::get_default_app_settings()
     settings.try_emplace(TR_KEY_statusbar_stats, StatsMode);
     settings.try_emplace(TR_KEY_watch_dir, download_dir);
     settings.try_emplace(TR_KEY_read_clipboard, false);
-    settings.try_emplace(TR_KEY_remote_session_rpc, TR_DEFAULT_RPC_URL_STR "rpc");
+    settings.try_emplace(TR_KEY_remote_session_rpc_url, TR_DEFAULT_RPC_URL_STR "rpc");
     return tr_variant{ std::move(settings) };
 }
 
