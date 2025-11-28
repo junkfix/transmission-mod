@@ -932,11 +932,11 @@ void on_announce_error(tr_tier* tier, char const* err, tr_announce_event e, time
     req.tracker_id = current_tracker->tracker_id;
     req.info_hash = tor->info_hash();
     req.peer_id = tor->peer_id();
-    req.up = tier->byteCounts[TR_ANN_UP];
-    req.down = tier->byteCounts[TR_ANN_DOWN];
-    req.corrupt = tier->byteCounts[TR_ANN_CORRUPT];
-    req.leftUntilComplete = tor->has_metainfo() ? tor->total_size() - tor->has_total() : INT64_MAX;
-    req.event = event;
+    req.up = 0;
+    req.down = 0;
+    req.corrupt = 0;
+    req.leftUntilComplete = tor->has_metainfo() ? tor->total_size() : INT64_MAX;
+    req.event = event == TR_ANNOUNCE_EVENT_COMPLETED ? TR_ANNOUNCE_EVENT_NONE : event;
     req.numwant = event == TR_ANNOUNCE_EVENT_STOPPED ? 0 : Numwant;
     req.key = tor->announce_key();
     req.partial_seed = tor->is_partial_seed();
