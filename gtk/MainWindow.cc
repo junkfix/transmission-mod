@@ -180,7 +180,7 @@ void MainWindow::Impl::on_popup_menu([[maybe_unused]] double event_x, [[maybe_un
 {
     if (popup_menu_ == nullptr)
     {
-        auto const menu = gtr_action_get_object<Gio::Menu>("main-window-popup");
+        auto const menu = gtr_action_get_object<Gio::Menu>(GTR_KEY_main_window_popup);
 
 #if GTKMM_CHECK_VERSION(4, 0, 0)
         popup_menu_ = Gtk::make_managed<Gtk::PopoverMenu>(menu, Gtk::PopoverMenu::Flags::NESTED);
@@ -275,7 +275,7 @@ void MainWindow::Impl::init_view(TorrentView* view, Glib::RefPtr<FilterBar::Mode
     item_factory_compact_ = create_builder_list_item_factory("TorrentListItemCompact.ui"s);
     item_factory_full_ = create_builder_list_item_factory("TorrentListItemFull.ui"s);
 
-    view->signal_activate().connect([](guint /*position*/) { gtr_action_activate("show-torrent-properties"); });
+    view->signal_activate().connect([](guint /*position*/) { gtr_action_activate(GTR_KEY_show_torrent_properties); });
 
     selection_ = Gtk::MultiSelection::create(model);
     selection_->signal_selection_changed().connect([this](guint /*position*/, guint /*n_items*/)
@@ -297,7 +297,7 @@ void MainWindow::Impl::init_view(TorrentView* view, Glib::RefPtr<FilterBar::Mode
 
     view->signal_popup_menu().connect_notify([this]() { on_popup_menu(0, 0); });
     view->signal_row_activated().connect([](auto const& /*path*/, auto* /*column*/)
-                                         { gtr_action_activate("show-torrent-properties"); });
+                                         { gtr_action_activate(GTR_KEY_show_torrent_properties); });
 
     view->set_model(model);
 
@@ -379,12 +379,13 @@ void MainWindow::Impl::syncAltSpeedButton()
 {
     bool const b = gtr_pref_flag_get(TR_KEY_alt_speed_enabled);
     alt_speed_button_->set_active(b);
-    alt_speed_button_->set_tooltip_text(fmt::format(
-        fmt::runtime(
-            b ? _("Click to disable Alternative Speed Limits\n ({download_speed} down, {upload_speed} up)") :
-                _("Click to enable Alternative Speed Limits\n ({download_speed} down, {upload_speed} up)")),
-        fmt::arg("download_speed", Speed{ gtr_pref_int_get(TR_KEY_alt_speed_down), Speed::Units::KByps }.to_string()),
-        fmt::arg("upload_speed", Speed{ gtr_pref_int_get(TR_KEY_alt_speed_up), Speed::Units::KByps }.to_string())));
+    alt_speed_button_->set_tooltip_text(
+        fmt::format(
+            fmt::runtime(
+                b ? _("Click to disable Alternative Speed Limits\n ({download_speed} down, {upload_speed} up)") :
+                    _("Click to enable Alternative Speed Limits\n ({download_speed} down, {upload_speed} up)")),
+            fmt::arg("download_speed", Speed{ gtr_pref_int_get(TR_KEY_alt_speed_down), Speed::Units::KByps }.to_string()),
+            fmt::arg("upload_speed", Speed{ gtr_pref_int_get(TR_KEY_alt_speed_up), Speed::Units::KByps }.to_string())));
 }
 
 void MainWindow::Impl::alt_speed_toggled_cb()

@@ -491,9 +491,10 @@ MessageLogWindow::Impl::Impl(
     , filter_(Gtk::TreeModelFilter::create(store_))
     , sort_(Gtk::TreeModelSort::create(filter_))
     , maxLevel_(static_cast<tr_log_level>(gtr_pref_int_get(TR_KEY_message_level)))
-    , refresh_tag_(Glib::signal_timeout().connect_seconds(
-          sigc::mem_fun(*this, &Impl::onRefresh),
-          SECONDARY_WINDOW_REFRESH_INTERVAL_SECONDS))
+    , refresh_tag_(
+          Glib::signal_timeout().connect_seconds(
+              sigc::mem_fun(*this, &Impl::onRefresh),
+              SECONDARY_WINDOW_REFRESH_INTERVAL_SECONDS))
 {
     /**
     ***  toolbar
@@ -501,15 +502,15 @@ MessageLogWindow::Impl::Impl(
 
     auto const action_group = Gio::SimpleActionGroup::create();
 
-    auto const save_action = Gio::SimpleAction::create("save-message-log");
+    auto const save_action = Gio::SimpleAction::create("save_message_log");
     save_action->signal_activate().connect([this](auto const& /*value*/) { onSaveRequest(); });
     action_group->add_action(save_action);
 
-    auto const clear_action = Gio::SimpleAction::create("clear-message-log");
+    auto const clear_action = Gio::SimpleAction::create("clear_message_log");
     clear_action->signal_activate().connect([this](auto const& /*value*/) { onClearRequest(); });
     action_group->add_action(clear_action);
 
-    auto const pause_action = Gio::SimpleAction::create_bool("pause-message-log");
+    auto const pause_action = Gio::SimpleAction::create_bool("pause_message_log");
     pause_action->signal_activate().connect([this, &action = *pause_action](auto const& /*value*/) { onPauseToggled(action); });
     action_group->add_action(pause_action);
 

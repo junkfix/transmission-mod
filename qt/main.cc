@@ -15,9 +15,12 @@
 #include <libtransmission/utils.h>
 #include <libtransmission/version.h>
 
+#include <libtransmission-app/app.h>
+
 #include "Application.h"
 #include "InteropHelper.h"
 #include "Prefs.h"
+#include "VariantHelpers.h"
 
 using namespace std::string_view_literals;
 
@@ -98,9 +101,8 @@ bool tryDelegate(QStringList const& filenames)
 
 int tr_main(int argc, char** argv)
 {
-    tr_lib_init();
-
-    tr_locale_set_global("");
+    transmission::app::init();
+    trqt::variant_helpers::register_qt_converters();
 
     // parse the command-line arguments
     bool minimized = false;
@@ -228,13 +230,13 @@ int tr_main(int argc, char** argv)
         prefs->set(Prefs::SESSION_IS_REMOTE, true);
     }
 
-    if (prefs->getBool(Prefs::START_MINIMIZED))
+    if (prefs->get<bool>(Prefs::START_MINIMIZED))
     {
         minimized = true;
     }
 
     // start as minimized only if the system tray present
-    if (!prefs->getBool(Prefs::SHOW_TRAY_ICON))
+    if (!prefs->get<bool>(Prefs::SHOW_TRAY_ICON))
     {
         minimized = false;
     }

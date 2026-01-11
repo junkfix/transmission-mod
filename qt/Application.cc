@@ -42,13 +42,14 @@
 namespace
 {
 
+// NOLINTBEGIN(cert-err58-cpp)
 auto const ConfigName = QStringLiteral("transmission");
-
 #ifdef QT_DBUS_LIB
 auto const FDONotificationsServiceName = QStringLiteral("org.freedesktop.Notifications");
 auto const FDONotificationsPath = QStringLiteral("/org/freedesktop/Notifications");
 auto const FDONotificationsInterfaceName = QStringLiteral("org.freedesktop.Notifications");
 #endif
+// NOLINTEND(cert-err58-cpp)
 
 auto constexpr StatsRefreshIntervalMsec = 3000;
 auto constexpr SessionRefreshIntervalMsec = 3000;
@@ -140,15 +141,6 @@ Application::Application(
     loadTranslations();
     initUnits();
 
-#if defined(_WIN32) || defined(__APPLE__)
-
-    if (QIcon::themeName().isEmpty())
-    {
-        QIcon::setThemeName(QStringLiteral("Faenza"));
-    }
-
-#endif
-
     setWindowIcon(makeWindowIcon());
 
 #ifdef __APPLE__
@@ -219,26 +211,6 @@ Application::Application(
     else
     {
         window_->openSession();
-    }
-
-    if (!prefs_->getBool(Prefs::USER_HAS_GIVEN_INFORMED_CONSENT))
-    {
-        auto* dialog = new QMessageBox{ QMessageBox::Information,
-                                        QString{},
-                                        tr("<b>Transmission is a file sharing program.</b>"),
-                                        QMessageBox::Ok | QMessageBox::Cancel,
-                                        window_.get() };
-        dialog->setInformativeText(
-            tr("When you run a torrent, its data will be made available to others by means of upload. "
-               "Any content you share is your sole responsibility."));
-        dialog->button(QMessageBox::Ok)->setText(tr("I &Agree"));
-        dialog->setDefaultButton(QMessageBox::Ok);
-        dialog->setModal(true);
-
-        connect(dialog, &QDialog::finished, this, &Application::consentGiven);
-
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
     }
 
     // torrent files passed in on the command line
@@ -323,7 +295,7 @@ QStringList Application::getNames(torrent_ids_t const& torrent_ids) const
 
 void Application::onTorrentsAdded(torrent_ids_t const& torrent_ids) const
 {
-    if (!prefs_->getBool(Prefs::SHOW_NOTIFICATION_ON_ADD))
+    if (!prefs_->get<bool>(Prefs::SHOW_NOTIFICATION_ON_ADD))
     {
         return;
     }
@@ -336,14 +308,14 @@ void Application::onTorrentsAdded(torrent_ids_t const& torrent_ids) const
 
 void Application::onTorrentsCompleted(torrent_ids_t const& torrent_ids) const
 {
-    if (prefs_->getBool(Prefs::SHOW_NOTIFICATION_ON_COMPLETE))
+    if (prefs_->get<bool>(Prefs::SHOW_NOTIFICATION_ON_COMPLETE))
     {
         auto const title = tr("Torrent(s) Completed", nullptr, static_cast<int>(std::size(torrent_ids)));
         auto const body = getNames(torrent_ids).join(QStringLiteral("\n"));
         notifyApp(title, body);
     }
 
-    if (prefs_->getBool(Prefs::COMPLETE_SOUND_ENABLED))
+    if (prefs_->get<bool>(Prefs::COMPLETE_SOUND_ENABLED))
     {
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
         beep();
@@ -370,21 +342,7 @@ void Application::notifyTorrentAdded(Torrent const* tor) const
     notifyApp(tr("Torrent Added"), tor->name(), actions);
 }
 
-/***
-****
-***/
-
-void Application::consentGiven(int result) const
-{
-    if (result == QMessageBox::Ok)
-    {
-        prefs_->set<bool>(Prefs::USER_HAS_GIVEN_INFORMED_CONSENT, true);
-    }
-    else
-    {
-        quit();
-    }
-}
+// ---
 
 void Application::saveGeometry() const
 {
@@ -398,9 +356,7 @@ void Application::saveGeometry() const
     }
 }
 
-/***
-****
-***/
+// ---
 
 void Application::refreshPref(int key) const
 {
@@ -412,7 +368,7 @@ void Application::refreshPref(int key) const
 
     case Prefs::DIR_WATCH:
     case Prefs::DIR_WATCH_ENABLED:
-        watch_dir_->setPath(prefs_->getString(Prefs::DIR_WATCH), prefs_->getBool(Prefs::DIR_WATCH_ENABLED));
+        watch_dir_->setPath(prefs_->get<QString>(Prefs::DIR_WATCH), prefs_->get<bool>(Prefs::DIR_WATCH_ENABLED));
         break;
 
     default:
@@ -422,12 +378,12 @@ void Application::refreshPref(int key) const
 
 void Application::maybeUpdateBlocklist() const
 {
-    if (!prefs_->getBool(Prefs::BLOCKLIST_UPDATES_ENABLED))
+    if (!prefs_->get<bool>(Prefs::BLOCKLIST_UPDATES_ENABLED))
     {
         return;
     }
 
-    QDateTime const last_updated_at = prefs_->getDateTime(Prefs::BLOCKLIST_DATE);
+    QDateTime const last_updated_at = prefs_->get<QDateTime>(Prefs::BLOCKLIST_DATE);
     QDateTime const next_update_at = last_updated_at.addDays(7);
     QDateTime const now = QDateTime::currentDateTime();
 
@@ -470,8 +426,8 @@ void Application::refreshTorrents()
 void Application::addWatchdirTorrent(QString const& filename) const
 {
     auto add_data = AddData{ filename };
-    auto const disposal = prefs_->getBool(Prefs::TRASH_ORIGINAL) ? AddData::FilenameDisposal::Delete :
-                                                                   AddData::FilenameDisposal::Rename;
+    auto const disposal = prefs_->get<bool>(Prefs::TRASH_ORIGINAL) ? AddData::FilenameDisposal::Delete :
+                                                                     AddData::FilenameDisposal::Rename;
     add_data.setFileDisposal(disposal);
     addTorrent(std::move(add_data));
 }
@@ -485,12 +441,12 @@ void Application::addTorrent(AddData addme) const
 
     // if there's not already a disposal action set,
     // then honor the `trash original` preference setting
-    if (!addme.fileDisposal() && prefs_->getBool(Prefs::TRASH_ORIGINAL))
+    if (!addme.fileDisposal() && prefs_->get<bool>(Prefs::TRASH_ORIGINAL))
     {
         addme.setFileDisposal(AddData::FilenameDisposal::Delete);
     }
 
-    if (!prefs_->getBool(Prefs::OPTIONS_PROMPT))
+    if (!prefs_->get<bool>(Prefs::OPTIONS_PROMPT))
     {
         session_->addTorrent(addme);
     }
@@ -529,9 +485,10 @@ bool Application::notifyApp(QString const& title, QString const& body, QStringLi
         args.append(title); // summary
         args.append(body); // body
         args.append(actions);
-        args.append(QVariantMap{ {
-            std::make_pair(QStringLiteral("category"), QVariant{ QStringLiteral("transfer.complete") }),
-        } }); // hints
+        args.append(
+            QVariantMap{ {
+                std::make_pair(QStringLiteral("category"), QVariant{ QStringLiteral("transfer.complete") }),
+            } }); // hints
         args.append(static_cast<int32_t>(-1)); // use the default timeout period
         m.setArguments(args);
         QDBusReply<quint32> const reply_msg = bus.call(m);

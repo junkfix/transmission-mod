@@ -53,7 +53,7 @@ set(OPENSSL_MINIMUM 1.1.0)
 set(MBEDTLS_MINIMUM 2.7)
 set(NPM_MINIMUM 10.2.3) # Node.js 20.10 (eslint-plugin-unicorn)
 set(PSL_MINIMUM 0.21.1)
-set(QT_MINIMUM 5.6)
+set(QT_MINIMUM 5.15)
 
 option(ENABLE_DAEMON "Build daemon" ON)
 tr_auto_option(ENABLE_GTK "Build GTK client" AUTO)
@@ -97,7 +97,7 @@ set(TR_NAME ${PROJECT_NAME})
 set(TR_VERSION_MAJOR "4")
 set(TR_VERSION_MINOR "1")
 set(TR_VERSION_PATCH "0")
-set(TR_VERSION_BETA_NUMBER "3") # empty string for not beta
+set(TR_VERSION_BETA_NUMBER "5") # empty string for not beta
 set(TR_VERSION_DEV FALSE)
 
 # derived from above: release type
@@ -448,16 +448,14 @@ if(ENABLE_QT)
             endif()
         endforeach()
 
-        if(Qt${Qt_VERSION_MAJOR}AxContainer_FOUND AND Qt${Qt_VERSION_MAJOR}AxServer_FOUND)
+        if(WIN32 AND Qt${Qt_VERSION_MAJOR}AxContainer_FOUND AND Qt${Qt_VERSION_MAJOR}AxServer_FOUND)
             set(ENABLE_QT_COM_INTEROP ON)
 
             find_program(MIDL_EXECUTABLE midl)
             if(NOT MIDL_EXECUTABLE)
                 set(ENABLE_QT_COM_INTEROP OFF)
             endif()
-        endif()
-
-        if(Qt${Qt_VERSION_MAJOR}DBus_FOUND)
+        elseif(NOT WIN32 AND Qt${Qt_VERSION_MAJOR}DBus_FOUND)
             set(ENABLE_QT_DBUS_INTEROP ON)
         endif()
     endif()
@@ -801,14 +799,14 @@ if(RUN_CLANG_TIDY)
     tr_get_required_flag(RUN_CLANG_TIDY CLANG_TIDY_IS_REQUIRED)
 
     message(STATUS "Looking for clang-tidy")
-    find_program(CLANG_TIDY clang-tidy)
+    find_program(CLANG_TIDY NAMES clang-tidy-20 clang-tidy)
     if(CLANG_TIDY STREQUAL "CLANG_TIDY-NOTFOUND")
         message(STATUS "Looking for clang-tidy - not found")
         if(CLANG_TIDY_IS_REQUIRED)
             message(FATAL_ERROR "clang-tidy is required but wasn't found")
         endif()
     else()
-        message(STATUS "Looking for clang-tidy - found")
+        message(STATUS "Looking for clang-tidy - found: ${CLANG_TIDY}")
         set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}")
     endif()
 endif()
@@ -827,6 +825,7 @@ function(tr_install_web DST_DIR)
 endfunction()
 
 add_subdirectory(libtransmission)
+add_subdirectory(libtransmission-app)
 
 set(MAC_PROJECT_DIR macosx)
 

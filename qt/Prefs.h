@@ -13,6 +13,8 @@
 
 #include <libtransmission/quark.h>
 
+#include <libtransmission-app/display-modes.h>
+
 class QDateTime;
 
 extern "C"
@@ -64,10 +66,9 @@ public:
         SESSION_REMOTE_PORT,
         SESSION_REMOTE_AUTH,
         SESSION_REMOTE_USERNAME,
-        SESSION_REMOTE_RPC_URL_PATH,
+        SESSION_REMOTE_URL_BASE_PATH,
         COMPLETE_SOUND_COMMAND,
         COMPLETE_SOUND_ENABLED,
-        USER_HAS_GIVEN_INFORMED_CONSENT,
         READ_CLIPBOARD,
         /* core prefs */
         FIRST_CORE_PREF,
@@ -103,7 +104,7 @@ public:
         SCRIPT_TORRENT_DONE_FILENAME,
         SCRIPT_TORRENT_DONE_SEEDING_ENABLED,
         SCRIPT_TORRENT_DONE_SEEDING_FILENAME,
-        SOCKET_TOS,
+        SOCKET_DIFFSERV,
         START,
         TRASH_ORIGINAL,
         PEX_ENABLED,
@@ -142,11 +143,6 @@ public:
         return FIRST_CORE_PREF <= key && key <= LAST_CORE_PREF;
     }
 
-    [[nodiscard]] constexpr auto isClient(int key) const noexcept
-    {
-        return !isCore(key);
-    }
-
     [[nodiscard]] constexpr auto getKey(int i) const noexcept
     {
         return Items[i].key;
@@ -162,14 +158,8 @@ public:
         return values_[i];
     }
 
-    int getInt(int key) const;
-    bool getBool(int key) const;
-    QString getString(int key) const;
-    double getDouble(int key) const;
-    QDateTime getDateTime(int key) const;
-
     template<typename T>
-    T get(int key) const
+    [[nodiscard]] T get(int const key) const
     {
         return values_[key].value<T>();
     }
@@ -186,8 +176,6 @@ public:
             emit changed(key);
         }
     }
-
-    void toggleBool(int key);
 
 signals:
     void changed(int key);

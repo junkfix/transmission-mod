@@ -183,7 +183,7 @@ struct tr_torrent
     void rename_path(
         std::string_view oldpath,
         std::string_view newname,
-        tr_torrent_rename_done_func callback,
+        tr_torrent_rename_done_func&& callback,
         void* callback_user_data);
 
     // these functions should become private when possible,
@@ -266,6 +266,10 @@ struct tr_torrent
     [[nodiscard]] constexpr auto block_loc(tr_block_index_t block) const noexcept
     {
         return metainfo_.block_loc(block);
+    }
+    [[nodiscard]] constexpr auto block_last_loc(tr_block_index_t block) const noexcept
+    {
+        return metainfo_.block_last_loc(block);
     }
     [[nodiscard]] constexpr auto piece_loc(tr_piece_index_t piece, uint32_t offset = 0, uint32_t length = 0) const noexcept
     {
@@ -436,6 +440,7 @@ struct tr_torrent
             file_priorities_.set(file, priority);
             priority_changed_.emit(this, &file, 1U, priority);
             set_dirty();
+            mark_changed();
         }
     }
 
@@ -870,7 +875,7 @@ struct tr_torrent
         return idle_limit_minutes_;
     }
 
-    [[nodiscard]] constexpr std::optional<size_t> idle_seconds(time_t now) const noexcept
+    [[nodiscard]] constexpr std::optional<time_t> idle_seconds(time_t now) const noexcept
     {
         auto const activity = this->activity();
 
@@ -878,7 +883,7 @@ struct tr_torrent
         {
             if (auto const latest = std::max(date_started_, date_active_); latest != 0)
             {
-                return static_cast<size_t>(std::max(now - latest, time_t{ 0 }));
+                return std::max(now - latest, time_t{ 0 });
             }
         }
 
@@ -1209,8 +1214,8 @@ private:
             return {};
         }
 
-        auto const idle_limit_seconds = size_t{ *idle_limit_minutes } * 60U;
-        return idle_limit_seconds > *idle_seconds ? idle_limit_seconds - *idle_seconds : 0U;
+        auto const idle_limit_seconds = static_cast<time_t>(*idle_limit_minutes * 60U);
+        return idle_limit_seconds > *idle_seconds ? idle_limit_seconds - *idle_seconds : time_t{ 0U };
     }
 
     [[nodiscard]] constexpr bool is_piece_transfer_allowed(tr_direction direction) const noexcept
@@ -1251,14 +1256,6 @@ private:
         }
     }
 
-    constexpr void bump_date_changed(time_t when)
-    {
-        if (date_changed_ < when)
-        {
-            date_changed_ = when;
-        }
-    }
-
     void set_verify_state(VerifyState state);
 
     [[nodiscard]] constexpr std::optional<float> verify_progress() const noexcept
@@ -1288,7 +1285,18 @@ private:
         completion_.set_has_piece(piece, has);
     }
 
+    constexpr void bump_date_changed(time_t when)
+    {
+        date_changed_ = std::max(date_changed_, when);
+    }
+
     void mark_changed();
+
+    constexpr void bump_date_edited(time_t when)
+    {
+        date_edited_ = std::max(date_edited_, when);
+    }
+
     void mark_edited();
 
     constexpr void set_dirty(bool dirty = true) noexcept
@@ -1323,7 +1331,7 @@ private:
     void rename_path_in_session_thread(
         std::string_view oldpath,
         std::string_view newname,
-        tr_torrent_rename_done_func callback,
+        tr_torrent_rename_done_func const& callback,
         void* callback_user_data);
 
     void start_in_session_thread();
@@ -1401,7 +1409,7 @@ private:
     time_t seconds_seeding_before_current_start_ = 0;
 
     float verify_progress_ = -1.0F;
-    float seed_ratio_ = 0.0F;
+    double seed_ratio_ = 0.0;
 
     tr_announce_key_t announce_key_ = tr_rand_obj<tr_announce_key_t>();
 
