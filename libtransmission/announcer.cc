@@ -926,15 +926,15 @@ void on_announce_error(tr_tier* tier, char const* err, tr_announce_event e, time
     TR_ASSERT(current_tracker != nullptr);
 
     return {
-        .event = event,
+        .event = event == TR_ANNOUNCE_EVENT_COMPLETED ? TR_ANNOUNCE_EVENT_NONE : event,
         .partial_seed = tor->is_partial_seed(),
         .port = announcer->session->advertisedPeerPort(),
         .key = tor->announce_key(),
         .numwant = event == TR_ANNOUNCE_EVENT_STOPPED ? 0 : Numwant,
-        .up = tier->byteCounts[TR_ANN_UP],
-        .down = tier->byteCounts[TR_ANN_DOWN],
-        .corrupt = tier->byteCounts[TR_ANN_CORRUPT],
-        .leftUntilComplete = tor->has_metainfo() ? tor->total_size() - tor->has_total() : INT64_MAX,
+        .up = 0,
+        .down = 0,
+        .corrupt = 0,
+        .leftUntilComplete = tor->has_metainfo() ? tor->total_size() : INT64_MAX,
         .announce_url = current_tracker->announce_url,
         .tracker_id = current_tracker->tracker_id,
         .peer_id = tor->peer_id(),
