@@ -11,8 +11,7 @@ on:
     paths-ignore:
       - 'docs/**'
       - '.github/**'
-  schedule:
-  #  - cron: '29 14 * * 1'
+
 
 jobs:
   analyze:
