@@ -248,7 +248,7 @@ The 'source' column here corresponds to the data structure there.
 | `desired_available`| number| tr_stat
 | `done_date`| number | tr_stat
 | `download_dir` | string  | tr_torrent
-| `integer` | number  | tr_stat
+| `downloaded_ever` | integer  | tr_stat
 | `download_limit` | integer  | tr_torrent
 | `download_limited` | boolean | tr_torrent
 | `edit_date` | number | tr_stat
@@ -581,7 +581,7 @@ Response parameters: `path`, `name`, and `id`, holding the torrent ID integer
 | `blocklist_enabled` | boolean | true means enabled
 | `blocklist_size` | number | number of rules in the blocklist
 | `blocklist_url` | string | location of the blocklist to use for `blocklist_update`
-| `cache_size_mib` | number | maximum size of the disk cache (MiB). Pieces are guaranteed to be written to filesystem if sequential download is enabled. Otherwise, data might still be in cache only.
+| `cache_size_mib` | number |**DEPRECATED** This property will be removed in Transmission 5.0.0. Clients should stop using this property now.
 | `config_dir` | string | location of transmission's configuration directory
 | `default_trackers` | string | announce URLs, one per line, and a blank line between [tiers](https://www.bittorrent.org/beps/bep_0012.html).
 | `dht_enabled` | boolean | true means allow DHT in public torrents
@@ -637,11 +637,11 @@ Response parameters: `path`, `name`, and `id`, holding the torrent ID integer
 
 | Key | Value Type | transmission.h source
 |:--|:--|:--
-| `speed_units`  | array  | 4 strings: KB/s, MB/s, GB/s, TB/s
+| `speed_units`  | array  | 5 strings: B/s, kB/s, MB/s, GB/s, TB/s
 | `speed_bytes`  | number | number of bytes in a KB (1000 for kB; 1024 for KiB)
-| `size_units`   | array  | 4 strings: KB/s, MB/s, GB/s, TB/s
+| `size_units`   | array  | 5 strings: B, kB, MB, GB, TB
 | `size_bytes`   | number | number of bytes in a KB (1000 for kB; 1024 for KiB)
-| `memory_units` | array  | 4 strings: KB/s, MB/s, GB/s, TB/s
+| `memory_units` | array  | 5 strings: B, KiB, MiB, GiB, TiB
 | `memory_bytes` | number | number of bytes in a KB (1000 for kB; 1024 for KiB)
 
 #### 4.1.1 Mutators
@@ -789,10 +789,10 @@ Response parameters: none
 #### 4.8.2 Bandwidth group accessor: `group_get`
 Method name: `group_get`
 
-Request parameters: An optional parameter `group`.
-`group` is either a string naming the bandwidth group,
+Request parameters: An optional parameter `name`.
+`name` is either a string naming the bandwidth group,
 or a list of such strings.
-If `group` is omitted, all bandwidth groups are used.
+If `name` is omitted, all bandwidth groups are used.
 
 Response parameters:
 
@@ -1121,3 +1121,4 @@ Transmission 4.2.0 (`rpc_version_semver` 6.1.0, `rpc_version`: ?)
 |:---|:---
 | `torrent_get` | new arg `webseeds_ex`
 | `torrent_get` | **DEPRECATED** `webseeds`. Use `webseeds_ex` instead.
+| `session_get` | **DEPRECATED** `cache_size_mib`. The memory cache is being removed, making this setting moot. The setting will still be gettable and settable via RPC `session_get` and `session_set` until Transmission 5.0.0 to avoid client breakage, but it will be otherwise unused in libtransmission. Clients should stop using this key.

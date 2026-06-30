@@ -23,6 +23,7 @@
 #include <string_view>
 #include <system_error>
 #include <type_traits>
+#include <utility> // std::cmp_equal
 #include <vector>
 
 #ifdef _WIN32
@@ -124,7 +125,7 @@ double tr_getRatio(uint64_t numerator, uint64_t denominator)
 {
     if (denominator > 0)
     {
-        return numerator / static_cast<double>(denominator);
+        return static_cast<double>(numerator) / static_cast<double>(denominator);
     }
 
     if (numerator > 0)
@@ -167,7 +168,7 @@ std::optional<std::vector<std::string>> win32MakeUtf8Argv()
         LocalFree(reinterpret_cast<HLOCAL>(wargv));
     }
 
-    if (static_cast<int>(std::size(argv)) == argc)
+    if (std::cmp_equal(std::size(argv), argc))
     {
         return argv;
     }
@@ -196,7 +197,7 @@ int tr_main_win32(int argc, char** argv, int (*real_main)(int, char**))
             std::back_inserter(argv_cstrs),
             [](auto& str) { return std::data(str); });
         argv_cstrs.push_back(nullptr); // argv is nullptr-terminated
-        return (*real_main)(std::size(*argv_strs), std::data(argv_cstrs));
+        return (*real_main)(static_cast<int>(std::size(*argv_strs)), std::data(argv_cstrs));
     }
 
     return (*real_main)(argc, argv);

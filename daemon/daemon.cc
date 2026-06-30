@@ -362,11 +362,9 @@ void printMessage(
 
 void pumpLogMessages(FILE* log_stream)
 {
-    tr_log_message* list = tr_logGetQueue();
-
-    for (tr_log_message const* l = list; l != nullptr; l = l->next)
+    for (auto const& l : tr_logGetQueue())
     {
-        printMessage(log_stream, l->when, l->level, l->name, l->message, l->file, l->line);
+        printMessage(log_stream, l.when, l.level, l.name, l.message, l.file, l.line);
     }
 
     // two reasons to not flush stderr:
@@ -376,8 +374,6 @@ void pumpLogMessages(FILE* log_stream)
     {
         fflush(log_stream);
     }
-
-    tr_logFreeQueue(list);
 }
 
 void periodic_update(evutil_socket_t /*fd*/, short /*what*/, void* arg)
@@ -697,13 +693,13 @@ bool tr_daemon::parse_args(int argc, char const* const* argv, bool* dump_setting
         case 953:
             if (auto const ratio_limit = tr_num_parse<double>(optstr); ratio_limit)
             {
-                map->insert_or_assign(TR_KEY_ratio_limit, *ratio_limit);
+                map->insert_or_assign(TR_KEY_seed_ratio_limit, *ratio_limit);
             }
-            map->insert_or_assign(TR_KEY_ratio_limit_enabled, true);
+            map->insert_or_assign(TR_KEY_seed_ratio_limited, true);
             break;
 
         case 954:
-            map->insert_or_assign(TR_KEY_ratio_limit_enabled, false);
+            map->insert_or_assign(TR_KEY_seed_ratio_limited, false);
             break;
 
         case 'x':

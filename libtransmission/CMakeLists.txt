@@ -28,6 +28,8 @@ target_sources(${TR_NAME}
         announcer-udp.cc
         announcer.cc
         announcer.h
+        local-data.cc
+        local-data.h
         api-compat.cc
         api-compat.h
         bandwidth.cc
@@ -39,8 +41,6 @@ target_sources(${TR_NAME}
         block-info.h
         blocklist.cc
         blocklist.h
-        cache.cc
-        cache.h
         clients.cc
         clients.h
         completion.cc
@@ -96,6 +96,10 @@ target_sources(${TR_NAME}
         peer-mse.h
         peer-msgs.cc
         peer-msgs.h
+        peer-socket-tcp.cc
+        peer-socket-tcp.h
+        peer-socket-utp.cc
+        peer-socket-utp.h
         peer-socket.cc
         peer-socket.h
         platform.cc
@@ -120,6 +124,7 @@ target_sources(${TR_NAME}
         session-alt-speeds.h
         session-id.cc
         session-id.h
+        session-settings.h
         session-thread.cc
         session-thread.h
         session.cc

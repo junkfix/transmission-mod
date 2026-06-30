@@ -112,12 +112,12 @@ public:
             bufferevent_free(event_);
         }
 
-        if (notify_pipe_[0] != TR_BAD_SOCKET)
+        if (is_valid_socket(notify_pipe_[0]))
         {
             tr_net_close_socket(notify_pipe_[0]);
         }
 
-        if (notify_pipe_[1] != TR_BAD_SOCKET)
+        if (is_valid_socket(notify_pipe_[1]))
         {
             tr_net_close_socket(notify_pipe_[1]);
         }
@@ -229,7 +229,7 @@ private:
             info->NextEntryOffset = bytes_transferred -
                 (reinterpret_cast<BYTE*>(info) - reinterpret_cast<BYTE*>(std::data(buffer_)));
 
-            send(notify_pipe_[1], reinterpret_cast<char const*>(std::data(buffer_)), bytes_transferred, 0);
+            send(notify_pipe_[1], reinterpret_cast<char const*>(std::data(buffer_)), static_cast<int>(bytes_transferred), 0);
 
             if (!to_bool(ReadDirectoryChangesW(
                     fd_,
@@ -284,17 +284,6 @@ private:
                 break;
             }
 
-            if (nread == static_cast<size_t>(-1))
-            {
-                auto const error_code = errno;
-                tr_logAddError(
-                    fmt::format(
-                        _("Couldn't read event: {error} ({error_code})"),
-                        fmt::arg("error", tr_strerror(error_code)),
-                        fmt::arg("error_code", error_code)));
-                break;
-            }
-
             if (nread != header_size)
             {
                 tr_logAddError(
@@ -320,17 +309,6 @@ private:
 
             // consume entire name into buffer
             nread = bufferevent_read(event, &buffer[header_size], nleft);
-            if (nread == static_cast<size_t>(-1))
-            {
-                auto const error_code = errno;
-                tr_logAddError(
-                    fmt::format(
-                        _("Couldn't read filename: {error} ({error_code})"),
-                        fmt::arg("error", tr_strerror(error_code)),
-                        fmt::arg("error_code", error_code)));
-                break;
-            }
-
             if (nread != nleft)
             {
                 tr_logAddError(
