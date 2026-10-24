@@ -7,7 +7,7 @@ if(POLICY CMP0114)
 endif()
 
 # Value should follow latest stable Xcode's RECOMMENDED_MACOSX_DEPLOYMENT_TARGET
-set(MACOS_SUPPORT_MINIMUM 11.0)
+set(MACOS_SUPPORT_MINIMUM 12.0)
 
 # The value of this variable should be set prior to the first project() command invocation.
 # See: https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_DEPLOYMENT_TARGET.html
@@ -796,6 +796,12 @@ else()
         list(APPEND WARNING_CANDIDATES -Wno-format)
     else()
         list(APPEND WARNING_CANDIDATES -Wformat-security)
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0)
+        # fix non-Transmission fmt+gcc
+        # https://github.com/fmtlib/fmt/commit/6870e4b06bbf0a0ddd98534a393a561261b3153c
+        list(REMOVE_ITEM WARNING_CANDIDATES -Wnull-dereference)
     endif()
 
     set(CMAKE_REQUIRED_FLAGS)
